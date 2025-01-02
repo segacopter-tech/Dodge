@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #222;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #game-over {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 36px;
+            text-align: center;
+            display: none;
+        }
+        #restart {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px 20px;
+            font-size: 18px;
+            color: white;
+            background-color: #444;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-over">Game Over!<br>Press R to Restart or Click Below</div>
+    <button id="restart">Restart</button>
+
+    <script>
+        let canvas, ctx;
+        let player, obstacles, isGameOver, score;
+
+        function startGame() {
+            canvas = document.createElement('canvas');
+            ctx = canvas.getContext('2d');
+            document.body.appendChild(canvas);
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            player = { x: 100, y: 100, size: 20, color: 'cyan', speed: 5 };
+            obstacles = [];
+            isGameOver = false;
+            score = 0;
+
+            function randomBetween(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            function createObstacle() {
+                const size = randomBetween(20, 50);
+                obstacles.push({
+                    x: canvas.width,
+                    y: randomBetween(0, canvas.height - size),
+                    size,
+                    speed: randomBetween(2, 6),
+                    color: `rgb(${randomBetween(100, 255)}, ${randomBetween(100, 255)}, ${randomBetween(100, 255)})`
+                });
+            }
+
+            function drawPlayer() {
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x, player.y, player.size, player.size);
+            }
+
+            function drawObstacles() {
+                obstacles.forEach(obstacle => {
+                    ctx.fillStyle = obstacle.color;
+                    ctx.fillRect(obstacle.x, obstacle.y, obstacle.size, obstacle.size);
+                });
+            }
+
+            function updateObstacles() {
+                obstacles.forEach(obstacle => {
+                    obstacle.x -= obstacle.speed;
+                });
+                obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.size > 0);
+            }
+
+            function checkCollision() {
+                for (const obstacle of obstacles) {
+                    if (
+                        player.x < obstacle.x + obstacle.size &&
+                        player.x + player.size > obstacle.x &&
+                        player.y < obstacle.y + obstacle.size &&
+                        player.y + player.size > obstacle.y
+                    ) {
+                        isGameOver = true;
+                        gameOverDiv.style.display = 'block';
+                        restartButton.style.display = 'block';
+                    }
+                }
+            }
+
+            function gameLoop() {
+                if (isGameOver) return;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                drawPlayer();
+                drawObstacles();
+
+                updateObstacles();
+                checkCollision();
+
+                player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+                player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+
+                score++;
+                ctx.fillStyle = 'white';
+                ctx.font = '20px Arial';
+                ctx.fillText(`Score: ${score}`, 20, 30);
+
+                requestAnimationFrame(gameLoop);
+            }
+
+            function resetGame() {
+                player = { x: 100, y: 100, size: 20, color: 'cyan', speed: 5 };
+                obstacles = [];
+                isGameOver = false;
+                score = 0;
+                gameOverDiv.style.display = 'none';
+                restartButton.style.display = 'none';
+                gameLoop();
+            }
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'ArrowUp') player.y -= player.speed;
+                if (e.key === 'ArrowDown') player.y += player.speed;
+                if (e.key === 'ArrowLeft') player.x -= player.speed;
+                if (e.key === 'ArrowRight') player.x += player.speed;
+                if (e.key === 'r' && isGameOver) resetGame();
+            });
+
+            restartButton.addEventListener('click', resetGame);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            createObstacle();
+            setInterval(() => {
+                if (!isGameOver) createObstacle();
+            }, 1000);
+
+            gameLoop();
+        }
+
+        const gameOverDiv = document.getElementById('game-over');
+        const restartButton = document.getElementById('restart');
+
+        startGame();
+    </script>
+</body>
+</html>
