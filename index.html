@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complex Game</title>
+    <title>SegaDodge</title>
     <style>
         body {
             margin: 0;
@@ -38,15 +38,63 @@
             cursor: pointer;
             display: none;
         }
+        #password-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            font-size: 20px;
+        }
+        #password-input {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+            margin-top: 10px;
+            color: black;
+        }
+        #submit-btn {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div id="password-screen">
+        <p>Enter the password to play:</p>
+        <input type="password" id="password-input" placeholder="Password">
+        <button id="submit-btn">Submit</button>
+    </div>
     <div id="game-over">Game Over!<br>Press R to Restart or Click Below</div>
     <button id="restart">Restart</button>
 
     <script>
+        const password = "matthewhaslrizz"; // Correct password
+
+        const passwordScreen = document.getElementById('password-screen');
+        const passwordInput = document.getElementById('password-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const gameOverDiv = document.getElementById('game-over');
+        const restartButton = document.getElementById('restart');
+
         let canvas, ctx;
         let player, obstacles, isGameOver, score;
+
+        submitBtn.addEventListener('click', function() {
+            const userPassword = passwordInput.value;
+
+            if (userPassword === password) {
+                passwordScreen.style.display = 'none';
+                startGame();
+            } else {
+                alert("Incorrect password. Access denied.");
+            }
+        });
 
         function startGame() {
             canvas = document.createElement('canvas');
@@ -164,11 +212,6 @@
 
             gameLoop();
         }
-
-        const gameOverDiv = document.getElementById('game-over');
-        const restartButton = document.getElementById('restart');
-
-        startGame();
     </script>
 </body>
 </html>
